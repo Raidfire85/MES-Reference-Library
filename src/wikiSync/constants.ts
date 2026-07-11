@@ -1,8 +1,24 @@
 export const SYNC_START = '<!-- MES-WIKI-SOURCE-SYNC-START -->';
 export const SYNC_END = '<!-- MES-WIKI-SOURCE-SYNC-END -->';
+export const EXAMPLE_SYNC_START = '<!-- MES-WIKI-EXAMPLE-SYNC-START -->';
+export const EXAMPLE_SYNC_END = '<!-- MES-WIKI-EXAMPLE-SYNC-END -->';
 export const HOME_NOTICE_START = '<!-- MES-WIKI-NOTICE-START -->';
 export const HOME_NOTICE_END = '<!-- MES-WIKI-NOTICE-END -->';
 export const SIDEBAR_PATTERN = /<div class=['"]wiki-sidebar['"]>/;
+
+/** Profile .cs files documented on an existing Meridius wiki HTML page. */
+export const MERIDIUS_WIKI_PROFILE_HTML: Record<string, string> = {
+  'BlockReplacementProfile.cs': 'Block-Replacement.html',
+  'DerelictionProfile.cs': 'Dereliction.html',
+  'EventProfile.cs': 'Event.html',
+  'LootProfile.cs': 'Loot.html',
+  'ManipulationProfile.cs': 'Manipulation.html',
+  'ReplenishmentProfile.cs': 'Replenishment.html',
+  'TriggerGroupProfile.cs': 'Trigger-Group.html',
+  'WaypointProfile.cs': 'Waypoint.html',
+  'WeaponModRulesProfile.cs': 'Weapon-Mod-Rules.html',
+  'ZoneConditionsProfile.cs': 'Zone-Conditions.html',
+};
 
 export const GITHUB_REPO = 'MeridiusIX/Modular-Encounters-Systems';
 export const GITHUB_BRANCH = 'master';

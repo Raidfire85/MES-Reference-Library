@@ -1,10 +1,69 @@
 import {
+  EXAMPLE_SYNC_END,
+  EXAMPLE_SYNC_START,
   HOME_NOTICE_END,
   HOME_NOTICE_START,
   SIDEBAR_PATTERN,
   SYNC_END,
   SYNC_START,
 } from './constants';
+
+export function removeExampleBlock(content: string): string {
+  if (!content.includes(EXAMPLE_SYNC_START)) {
+    return content;
+  }
+
+  const pattern = new RegExp(
+    `${escapeRegex(EXAMPLE_SYNC_START)}[\\s\\S]*?${escapeRegex(EXAMPLE_SYNC_END)}`,
+    'g'
+  );
+  return content.replace(pattern, '').trimEnd();
+}
+
+export function injectProfileExampleSection(content: string, exampleSection: string): string {
+  const base = removeExampleBlock(content).trimEnd();
+  if (!exampleSection.trim()) {
+    return base;
+  }
+
+  const block = exampleSection.trim();
+  const syncStart = base.indexOf(SYNC_START);
+  if (syncStart !== -1) {
+    return `${base.slice(0, syncStart).trimEnd()}\n\n${block}\n\n${base.slice(syncStart)}`;
+  }
+
+  const sidebarIdx = findSidebarIndex(base);
+  if (sidebarIdx !== -1) {
+    return `${base.slice(0, sidebarIdx).trimEnd()}\n\n${block}\n\n${base.slice(sidebarIdx)}`;
+  }
+
+  return `${base}\n\n${block}\n`;
+}
+
+export function updateProfilePageBlurb(content: string, title: string, blurb: string): string {
+  const introHtml = `<p>${blurb}</p>`;
+  const headerLine = content.match(/<p>Profile header: <code>[^<]+<\/code><\/p>/i)?.[0] ?? '';
+  const pattern =
+    /(<div class="wiki-content">\s*<div class="markdown-body">)([\s\S]*?)(\s*<\/div>\s*<\/div>\s*(?=<div class=['"]wiki-sidebar['"]>))/;
+
+  if (!pattern.test(content)) {
+    return content;
+  }
+
+  return content.replace(pattern, (_, head, body, tail) => {
+    let nextBody = body;
+    nextBody = removeExampleBlock(nextBody);
+    nextBody = removeSyncBlock(nextBody);
+
+    const stopMatch = nextBody.match(
+      /<!-- MES-WIKI-EXAMPLE-SYNC-START -->|<!-- MES-WIKI-SOURCE-SYNC-START -->|<div class="mes-profile-tag-tables">/i
+    );
+    const preserved = stopMatch ? nextBody.slice(stopMatch.index) : '';
+    const mergedIntro = headerLine ? `${introHtml}\n${headerLine}` : introHtml;
+
+    return `${head}${mergedIntro}\n\n${preserved.trim()}${tail}`;
+  });
+}
 
 export function removeSyncBlock(content: string): string {
   if (!content.includes(SYNC_START)) {
@@ -200,48 +259,13 @@ export function applyTargetMaxTargetValueNote(content: string): { content: strin
 }
 
 import type { DiscoveredProfile } from './discoveredProfiles';
-
-const PLAYER_LINE =
-  '<li><a href="Player-Condition-Profile.html"><strong>Player Conditions (New)</strong></a></li>';
-
-function buildDiscoveredSidebarLinks(profiles: DiscoveredProfile[]): string {
-  return profiles
-    .map(
-      (profile) =>
-        `<li><a href="${profile.htmlFile}"><strong>${profile.title}</strong></a></li>`
-    )
-    .join('\n');
-}
-
-function hasWikiSidebar(content: string): boolean {
-  SIDEBAR_PATTERN.lastIndex = 0;
-  return SIDEBAR_PATTERN.test(content);
-}
+import { updateStructuredSidebars } from './htmlSidebarNav';
 
 export function updateSidebars(
   content: string,
   profiles: DiscoveredProfile[] = []
 ): { content: string; changed: boolean } {
-  if (!hasWikiSidebar(content) || !content.includes(PLAYER_LINE) || profiles.length === 0) {
-    return { content, changed: false };
-  }
-
-  let updated = content;
-  for (const profile of profiles) {
-    const pattern = new RegExp(
-      `<li><a href="${escapeRegex(profile.htmlFile)}"><strong>[^<]*</strong></a></li>\\s*`,
-      'g'
-    );
-    updated = updated.replace(pattern, '');
-  }
-
-  const sidebarLinks = buildDiscoveredSidebarLinks(profiles);
-  const next = updated.replace(PLAYER_LINE, `${PLAYER_LINE}\n${sidebarLinks}`);
-
-  return {
-    content: next,
-    changed: !contentEquals(content, next),
-  };
+  return updateStructuredSidebars(content, profiles);
 }
 
 export function removeHomeNotice(content: string): { content: string; changed: boolean } {
@@ -268,7 +292,9 @@ export function buildProfilePageFromTemplate(
   title: string,
   introHtml: string,
   tablesHtml: string,
-  author: string
+  author: string,
+  exampleSection = '',
+  header: string | null = null
 ): string {
   let html = template.replace(/<title>[^<]*<\/title>/, `<title>${title} &middot; MES Reference Library</title>`);
   html = html.replace(
@@ -277,8 +303,9 @@ export function buildProfilePageFromTemplate(
   );
   html = setWikiPageAuthor(html, author);
 
+  const headerLine = header ? `<p>Profile header: <code>${header}</code></p>\n` : '';
   const bodyContent = `${introHtml}
-<p>Below you can find all tags parsed from MES source for this profile type:</p>
+${headerLine}${exampleSection ? `${exampleSection.trim()}\n` : ''}<p>Below are the tags you can use in your ${title} profiles:</p>
 <div class="mes-profile-tag-tables">
 ${tablesHtml}
 </div>`;

@@ -1,58 +1,23 @@
-/* MES Reference Library - offline GitHub wiki styling (dark theme) */
+/* Theme C — Space Industrial (MES Reference Library offline wiki) */
 
 :root {
-  --color-canvas-default: #0d1117;
-  --color-canvas-subtle: #161b22;
-  --color-canvas-inset: #010409;
-  --color-fg-default: #c9d1d9;
-  --color-fg-muted: #8b949e;
-  --color-fg-subtle: #6e7681;
-  --color-border-default: #30363d;
-  --color-border-muted: #21262d;
-  --color-accent-fg: #58a6ff;
-  --color-accent-emphasis: #1f6feb;
-  --color-danger-fg: #f85149;
-  --color-attention-fg: #d29922;
-  --color-done-fg: #3fb950;
-  --color-prettylights-syntax-comment: #8b949e;
-  --color-prettylights-syntax-constant: #79c0ff;
-  --color-prettylights-syntax-entity: #d2a8ff;
-  --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
-  --color-prettylights-syntax-entity-tag: #7ee787;
-  --color-prettylights-syntax-keyword: #ff7b72;
-  --color-prettylights-syntax-string: #a5d6ff;
-  --color-prettylights-syntax-variable: #ffa657;
-  --color-prettylights-syntax-brackethighlighter-unmatched: #f85149;
-  --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
-  --color-prettylights-syntax-invalid-illegal-bg: #8e1519;
-  --color-prettylights-syntax-carriage-return-text: #f0f6fc;
-  --color-prettylights-syntax-carriage-return-bg: #b62324;
-  --color-prettylights-syntax-string-regexp: #7ee787;
-  --color-prettylights-syntax-markup-list: #f2cc60;
-  --color-prettylights-syntax-markup-heading: #1f6feb;
-  --color-prettylights-syntax-markup-italic: #c9d1d9;
-  --color-prettylights-syntax-markup-bold: #c9d1d9;
-  --color-prettylights-syntax-markup-deleted-text: #ffdcd7;
-  --color-prettylights-syntax-markup-deleted-bg: #67060c;
-  --color-prettylights-syntax-markup-inserted-text: #aff5b4;
-  --color-prettylights-syntax-markup-inserted-bg: #033a16;
-  --color-prettylights-syntax-markup-changed-text: #ffdfb6;
-  --color-prettylights-syntax-markup-changed-bg: #5a1e02;
-  --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
-  --color-prettylights-syntax-markup-ignored-bg: #1158c7;
-  --color-prettylights-syntax-meta-diff-range: #d2a8ff;
-  --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
-  --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
-  --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
-  --color-prettylights-syntax-markup-underline: #c9d1d9;
-  --color-neutral-muted: rgba(110, 118, 129, 0.4);
-  --color-attention-subtle: rgba(187, 128, 9, 0.15);
-  --color-danger-subtle: rgba(248, 81, 73, 0.1);
-  --color-done-subtle: rgba(46, 160, 67, 0.15);
+  --mes-bg-deep: #0a0c0f;
+  --mes-bg-panel: #12151a;
+  --mes-bg-elevated: #1a1e26;
+  --mes-bg-hover: #222830;
+  --mes-border: #2e3540;
+  --mes-border-strong: #3d4654;
+  --mes-text: #e4e8ed;
+  --mes-text-muted: #9aa3b2;
+  --mes-amber: #f0a030;
+  --mes-amber-bright: #ffb347;
+  --mes-amber-dim: #c47a18;
+  --mes-amber-glow: rgba(240, 160, 48, 0.15);
+  --mes-code-bg: #0f1218;
   --wiki-max-width: 1280px;
   --wiki-sidebar-width: 320px;
-  --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-  --font-stack-monospace: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-stack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-stack-monospace: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 *,
@@ -68,20 +33,21 @@ html {
 body {
   margin: 0;
   padding: 20px;
-  background-color: var(--color-canvas-default);
-  color: var(--color-fg-default);
+  background-color: var(--mes-bg-deep);
+  color: var(--mes-text);
   font-family: var(--font-stack);
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.65;
   word-wrap: break-word;
 }
 
 a {
-  color: var(--color-accent-fg);
+  color: var(--mes-amber-bright);
   text-decoration: none;
 }
 
 a:hover {
+  color: #ffd080;
   text-decoration: underline;
 }
 
@@ -91,7 +57,7 @@ a:hover {
   max-width: var(--wiki-max-width);
   margin: 0 auto 20px;
   padding: 10px 0;
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 2px solid var(--mes-amber-dim);
 }
 
 .wiki-tab {
@@ -99,21 +65,24 @@ a:hover {
   align-items: center;
   gap: 8px;
   padding: 8px 0;
-  color: var(--color-fg-default);
-  font-size: 1.2em;
+  color: var(--mes-amber-bright);
+  font-family: var(--font-stack-monospace);
+  font-size: 1.05em;
   font-weight: 600;
+  letter-spacing: 0.02em;
   text-decoration: none;
-  border-bottom: 2px solid #fd8c73;
-  margin-bottom: -1px;
+  border-bottom: 2px solid var(--mes-amber);
+  margin-bottom: -2px;
 }
 
 .wiki-tab:hover {
+  color: #ffd080;
   text-decoration: none;
 }
 
 .wiki-tab .octicon {
   fill: currentColor;
-  color: var(--color-fg-muted);
+  color: var(--mes-amber);
 }
 
 .wiki-header {
@@ -123,14 +92,18 @@ a:hover {
 
 .gh-header-title {
   margin: 0 0 8px;
+  font-family: var(--font-stack-monospace);
   font-size: 32px;
   font-weight: 600;
   line-height: 1.25;
-  color: var(--color-fg-default);
+  letter-spacing: 0.01em;
+  color: var(--mes-text);
+  border-bottom: 2px solid var(--mes-amber-dim);
+  padding-bottom: 0.35em;
 }
 
 .gh-header-meta {
-  color: var(--color-fg-muted);
+  color: var(--mes-text-muted);
   font-size: 14px;
 }
 
@@ -138,6 +111,7 @@ a:hover {
   max-width: var(--wiki-max-width);
   margin: 0 auto;
   display: flex;
+  flex-direction: row-reverse;
   gap: 20px;
   align-items: flex-start;
 }
@@ -166,9 +140,9 @@ a:hover {
 /* ── Sidebar box ─────────────────────────────────────────────── */
 
 .Box {
-  background-color: var(--color-canvas-default);
-  border: 1px solid var(--color-border-default);
-  border-radius: 6px;
+  background-color: var(--mes-bg-panel);
+  border: 1px solid var(--mes-border);
+  border-radius: 4px;
   overflow: hidden;
 }
 
@@ -182,9 +156,9 @@ a:hover {
 
 .wiki-rightbar .Box {
   margin-bottom: 16px;
-  background-color: var(--color-canvas-default);
-  border: 1px solid var(--color-border-default);
-  border-radius: 6px;
+  background-color: var(--mes-bg-panel);
+  border: 1px solid var(--mes-border);
+  border-radius: 4px;
 }
 
 .wiki-rightbar .Box-body {
@@ -194,10 +168,10 @@ a:hover {
 /* ── Markdown body (main content) ────────────────────────────── */
 
 .markdown-body {
-  color: var(--color-fg-default);
+  color: var(--mes-text);
   font-family: var(--font-stack);
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.65;
   word-wrap: break-word;
   display: flow-root;
 }
@@ -218,32 +192,27 @@ a:hover {
 .markdown-body h6 {
   margin-top: 24px;
   margin-bottom: 16px;
+  font-family: var(--font-stack-monospace);
   font-weight: 600;
   line-height: 1.25;
-  color: var(--color-fg-default);
-}
-
-.markdown-body h1 .heading-element,
-.markdown-body h2 .heading-element,
-.markdown-body h3 .heading-element,
-.markdown-body h4 .heading-element,
-.markdown-body h5 .heading-element,
-.markdown-body h6 .heading-element {
-  display: inline;
+  letter-spacing: 0.01em;
+  color: var(--mes-text);
 }
 
 .markdown-body h1,
 .markdown-body h2 {
   padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--color-border-muted);
+  border-bottom: 1px solid var(--mes-border);
 }
 
 .markdown-body h1 {
   font-size: 2em;
+  border-bottom: 2px solid var(--mes-amber-dim);
 }
 
 .markdown-body h2 {
   font-size: 1.5em;
+  margin-top: 1.75em;
 }
 
 .markdown-body h3 {
@@ -260,7 +229,7 @@ a:hover {
 
 .markdown-body h6 {
   font-size: 0.85em;
-  color: var(--color-fg-muted);
+  color: var(--mes-text-muted);
 }
 
 .markdown-body p,
@@ -278,15 +247,17 @@ a:hover {
   height: 0.25em;
   padding: 0;
   margin: 24px 0;
-  background-color: var(--color-border-default);
+  background-color: var(--mes-border);
   border: 0;
   overflow: hidden;
 }
 
 .markdown-body blockquote {
   padding: 0 1em;
-  color: var(--color-fg-muted);
-  border-left: 0.25em solid var(--color-border-default);
+  color: var(--mes-text-muted);
+  border-left: 4px solid var(--mes-amber);
+  background: var(--mes-bg-elevated);
+  border-radius: 0 4px 4px 0;
 }
 
 .markdown-body ul,
@@ -294,95 +265,25 @@ a:hover {
   padding-left: 2em;
 }
 
-.markdown-body ul ul,
-.markdown-body ul ol,
-.markdown-body ol ol,
-.markdown-body ol ul {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
 .markdown-body li + li {
   margin-top: 0.25em;
 }
 
-.markdown-body li > p {
-  margin-top: 16px;
-}
-
-.markdown-body li + p {
-  margin-top: 16px;
-}
-
-.markdown-body dl {
-  padding: 0;
-}
-
-.markdown-body dl dt {
-  padding: 0;
-  margin-top: 16px;
-  font-size: 1em;
-  font-style: italic;
-  font-weight: 600;
-}
-
-.markdown-body dl dd {
-  padding: 0 16px;
-  margin-bottom: 16px;
-}
-
 .markdown-body strong {
   font-weight: 600;
-  color: var(--color-fg-default);
-}
-
-.markdown-body a:not([href]) {
-  color: inherit;
-  text-decoration: none;
-}
-
-.markdown-body .absent {
-  color: var(--color-danger-fg);
-}
-
-.markdown-body .anchor {
-  float: left;
-  padding-right: 4px;
-  margin-left: -20px;
-  line-height: 1;
-  color: var(--color-fg-subtle);
-  visibility: hidden;
-}
-
-.markdown-body .anchor:focus,
-.markdown-heading:hover .anchor,
-.markdown-body h1:hover .anchor,
-.markdown-body h2:hover .anchor,
-.markdown-body h3:hover .anchor,
-.markdown-body h4:hover .anchor,
-.markdown-body h5:hover .anchor,
-.markdown-body h6:hover .anchor {
-  visibility: visible;
-}
-
-.markdown-body .anchor .octicon-link {
-  display: inline-block;
-  vertical-align: middle;
-  fill: currentColor;
-}
-
-.markdown-heading {
-  position: relative;
+  color: var(--mes-text);
 }
 
 .markdown-body code,
 .markdown-body tt {
-  padding: 0.2em 0.4em;
+  padding: 0.1em 0.35em;
   margin: 0;
-  font-size: 85%;
+  font-size: 0.88em;
   white-space: break-spaces;
-  background-color: var(--color-neutral-muted);
-  border-radius: 6px;
+  background: var(--mes-code-bg);
+  border: 1px solid var(--mes-border);
+  color: var(--mes-amber-bright);
+  border-radius: 3px;
   font-family: var(--font-stack-monospace);
 }
 
@@ -391,16 +292,17 @@ a:hover {
   overflow: auto;
   font-size: 85%;
   line-height: 1.45;
-  color: var(--color-fg-default);
+  color: #d4dae4;
   word-wrap: normal;
-  background-color: var(--color-canvas-subtle);
-  border-radius: 6px;
+  background: var(--mes-code-bg);
+  border: 1px solid var(--mes-border-strong);
+  border-left: 3px solid var(--mes-amber-dim);
+  border-radius: 4px;
 }
 
 .markdown-body pre code,
 .markdown-body pre tt {
   display: inline;
-  max-width: auto;
   padding: 0;
   margin: 0;
   overflow: visible;
@@ -410,45 +312,42 @@ a:hover {
   border: 0;
   font-size: 100%;
   white-space: pre;
-}
-
-.markdown-body .highlight {
-  margin-bottom: 16px;
-}
-
-.markdown-body .highlight pre {
-  margin-bottom: 0;
-  word-break: normal;
-}
-
-.markdown-body .highlight pre,
-.markdown-body pre {
-  background-color: var(--color-canvas-subtle);
+  color: inherit;
 }
 
 .markdown-body img {
   max-width: 100%;
   box-sizing: content-box;
-  background-color: var(--color-canvas-default);
+  background-color: var(--mes-bg-deep);
   border-style: none;
 }
 
-/* Tables (tag reference pages) */
-.mes-tag-table-wrap {
-  display: block;
-  width: 100%;
-  clear: both;
-  margin-bottom: 16px;
-  overflow-x: auto;
-}
-
+/* Sync sections */
 .mes-wiki-sync-section {
   display: block;
   width: 100%;
   clear: both;
+  margin: 1.5em 0;
+  padding: 1em 1.25em;
+  border: 1px solid var(--mes-border-strong);
+  border-left: 4px solid var(--mes-amber);
+  background: var(--mes-bg-elevated);
+  border-radius: 4px;
 }
 
-/* Keep sync content in the main column if it ever lands as a direct flex child */
+.mes-profile-example {
+  margin: 1.25em 0;
+  padding: 1em 1.25em;
+  border: 1px solid var(--mes-border);
+  border-left: 4px solid var(--mes-amber-dim);
+  background: var(--mes-bg-panel);
+  border-radius: 4px;
+}
+
+.mes-profile-example pre {
+  margin-bottom: 0;
+}
+
 .wiki-container > .mes-wiki-sync-section {
   flex: 1 1 100%;
   width: 100%;
@@ -462,10 +361,13 @@ a:hover {
   clear: both;
 }
 
-.mes-wiki-sync-section > p,
-.mes-wiki-sync-section > .markdown-heading {
+/* Tables (tag reference pages) */
+.mes-tag-table-wrap {
+  display: block;
   width: 100%;
-  max-width: 100%;
+  clear: both;
+  margin-bottom: 16px;
+  overflow-x: auto;
 }
 
 .markdown-body table,
@@ -484,26 +386,33 @@ a:hover {
 }
 
 .markdown-body table th {
+  font-family: var(--font-stack-monospace);
   font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--mes-amber-bright);
+  background: var(--mes-bg-elevated) !important;
+  border: 1px solid var(--mes-border-strong) !important;
 }
 
 .markdown-body table th,
 .markdown-body table td {
   padding: 6px 13px;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--mes-border);
 }
 
 .markdown-body table tr {
-  background-color: var(--color-canvas-default);
-  border-top: 1px solid var(--color-border-muted);
+  background-color: var(--mes-bg-panel);
+  border-top: 1px solid var(--mes-border);
 }
 
 .markdown-body table tr:nth-child(2n) {
-  background-color: var(--color-canvas-subtle);
+  background-color: var(--mes-bg-deep);
 }
 
-.markdown-body table img {
-  background-color: transparent;
+.markdown-body table td {
+  color: var(--mes-text);
 }
 
 /* ── Sidebar markdown overrides ──────────────────────────────── */
@@ -513,11 +422,16 @@ a:hover {
 }
 
 .wiki-rightbar .markdown-body h1 {
-  font-size: 1.6em;
-  margin-top: 24px;
-  margin-bottom: 16px;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--color-border-muted);
+  font-family: var(--font-stack-monospace);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mes-amber);
+  margin-top: 1em;
+  margin-bottom: 0.35em;
+  padding: 0 0 0 0.25em;
+  border-bottom: none;
 }
 
 .wiki-rightbar .markdown-body h1:first-child {
@@ -525,35 +439,71 @@ a:hover {
 }
 
 .wiki-rightbar .markdown-body h2 {
-  font-size: 1.4em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mes-amber-dim);
+  border-bottom: none;
 }
 
 .wiki-rightbar .markdown-body .anchor {
   display: none;
 }
 
-.wiki-rightbar .markdown-body p:last-child,
-.wiki-rightbar .markdown-body ul:last-child,
-.wiki-rightbar .markdown-body ol:last-child {
-  margin-bottom: 0;
+.wiki-rightbar .markdown-body a {
+  color: var(--mes-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  border-left: 3px solid transparent;
+  padding-left: 0.35em;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.wiki-rightbar .markdown-body a:hover {
+  color: var(--mes-text);
+  background: var(--mes-bg-hover);
+  border-left-color: var(--mes-amber-dim);
+  text-decoration: none;
+}
+
+.wiki-rightbar .markdown-body a strong {
+  font-weight: 600;
+  color: inherit;
 }
 
 .wiki-rightbar .markdown-body ul {
-  padding-left: 1.5em;
+  padding-left: 1.25em;
 }
 
 .wiki-rightbar .markdown-body li {
   margin-top: 0.125em;
 }
 
-.wiki-rightbar .markdown-body a {
-  font-weight: 400;
-  color: var(--color-accent-fg);
+.wiki-rightbar .markdown-body li.mes-nav-group > strong,
+.wiki-rightbar .markdown-body li > strong:first-child {
+  display: block;
+  font-family: var(--font-stack-monospace);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mes-amber-dim);
+  margin-top: 0.35em;
+  margin-bottom: 0.15em;
+  padding-left: 0.35em;
 }
 
-.wiki-rightbar .markdown-body a strong {
-  font-weight: 600;
-  color: inherit;
+.wiki-rightbar .markdown-body li.mes-nav-group > ul {
+  padding-left: 1em;
+  margin-top: 0.15em;
+}
+
+.wiki-sidebar {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
 }
 
 /* ── Octicons ────────────────────────────────────────────────── */
@@ -578,9 +528,10 @@ a:hover {
 /* ── Embedded XML / blob code blocks (template pages) ─────────── */
 
 .wiki-content--blob {
-  background-color: var(--color-canvas-subtle);
-  border: 1px solid var(--color-border-default);
-  border-radius: 6px;
+  background-color: var(--mes-code-bg);
+  border: 1px solid var(--mes-border);
+  border-left: 3px solid var(--mes-amber-dim);
+  border-radius: 4px;
   padding: 0;
   overflow: hidden;
 }
@@ -591,8 +542,8 @@ a:hover {
 }
 
 .highlight {
-  background-color: var(--color-canvas-subtle);
-  color: var(--color-fg-default);
+  background-color: var(--mes-code-bg);
+  color: var(--mes-text);
   font-family: var(--font-stack-monospace);
   font-size: 12px;
   line-height: 20px;
@@ -613,13 +564,13 @@ a:hover {
   font-family: var(--font-stack-monospace);
   font-size: 12px;
   line-height: 20px;
-  color: var(--color-fg-subtle);
+  color: var(--mes-text-muted);
   text-align: right;
   white-space: nowrap;
   vertical-align: top;
   user-select: none;
-  background-color: var(--color-canvas-default);
-  border-right: 1px solid var(--color-border-default);
+  background-color: var(--mes-bg-deep);
+  border-right: 1px solid var(--mes-border);
 }
 
 .blob-code {
@@ -627,15 +578,15 @@ a:hover {
   padding: 0 10px;
   line-height: 20px;
   vertical-align: top;
-  background-color: var(--color-canvas-subtle);
-  color: var(--color-fg-default);
+  background-color: var(--mes-code-bg);
+  color: var(--mes-text);
 }
 
 .blob-code-inner {
   overflow: visible;
   font-family: var(--font-stack-monospace);
   font-size: 12px;
-  color: var(--color-fg-default);
+  color: var(--mes-text);
   word-wrap: normal;
   white-space: pre;
 }
@@ -644,8 +595,76 @@ a:hover {
 .pl-e { color: #79c0ff; }
 .pl-s { color: #a5d6ff; }
 .pl-pds { color: #a5d6ff; }
-.pl-c { color: #8b949e; font-style: italic; }
+.pl-c { color: var(--mes-text-muted); font-style: italic; }
 
 markdown-accessiblity-table {
   display: contents;
+}
+
+/* ── What's new embed (home page) ────────────────────────────── */
+
+.mes-wiki-updates {
+  border: 1px solid var(--mes-border-strong);
+  border-left: 4px solid var(--mes-amber);
+  background: var(--mes-bg-elevated);
+  padding: 1em 1.25em;
+  margin: 1.5em 0 2em;
+  border-radius: 4px;
+}
+
+.mes-wiki-updates-label {
+  margin: 0 0 0.35em;
+  font-family: var(--font-stack-monospace);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mes-amber);
+}
+
+.mes-wiki-updates-summary {
+  margin: 0 0 0.75em;
+  color: var(--mes-text-muted);
+}
+
+.mes-wiki-updates-meta {
+  margin: 0 0 0.25em;
+  color: var(--mes-text);
+}
+
+.mes-wiki-updates-source {
+  margin: 0 0 0.75em;
+  font-size: 0.92em;
+  color: var(--mes-text-muted);
+}
+
+.mes-wiki-updates a {
+  color: var(--mes-amber-bright);
+  text-decoration: none;
+}
+
+.mes-wiki-updates a:hover {
+  text-decoration: underline;
+}
+
+.mes-wiki-updates-latest,
+.mes-wiki-updates-history ul {
+  margin: 0 0 0.75em 1.1em;
+  padding: 0;
+}
+
+.mes-wiki-updates-history-entry {
+  margin-bottom: 0.85em;
+}
+
+.mes-wiki-updates-history-date {
+  margin: 0 0 0.35em;
+  font-weight: 600;
+  color: var(--mes-text-muted);
+}
+
+.mes-wiki-updates-history summary {
+  cursor: pointer;
+  color: var(--mes-amber);
+  margin-bottom: 0.5em;
 }

@@ -1,18 +1,18 @@
 {
   "name": "mes-reference-library",
   "displayName": "MES Reference Library",
-  "description": "Unofficial community tool for MES/RivalAI mod authors. Offline wiki with search and bookmarks. Validates mod .sbc files: MES profiles, cross-file references, audio/container/prefab links, and a mod validation report. Conservative one-click quick fixes. Optional GitHub sync updates tag docs (internet required). Not affiliated with MeridiusIX.",
-  "version": "3.15.5",
+  "description": "Unofficial MES/RivalAI modding tool for Space Engineers. Offline community wiki (~80+ pages) with search and bookmarks. Validates .sbc files: profile headers, tags, cross-file references, and mod reports. Optional GitHub sync updates wiki from MES-WebWiki and validator tags from MES source. Works fully offline after install. Not affiliated with MeridiusIX.",
+  "version": "3.18.4",
   "publisher": "raidfire",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Raidfire85/mes-reference-library.git"
+    "url": "https://github.com/Raidfire85/MES-Reference-Library.git"
   },
   "bugs": {
-    "url": "https://github.com/Raidfire85/mes-reference-library/issues"
+    "url": "https://github.com/Raidfire85/MES-Reference-Library/issues"
   },
-  "homepage": "https://github.com/Raidfire85/mes-reference-library#readme",
+  "homepage": "https://github.com/Raidfire85/MES-Reference-Library#readme",
   "icon": "media/icon.png",
   "engines": {
     "vscode": "^1.85.0"
@@ -79,7 +79,7 @@
       },
       {
         "command": "mesReference.syncWiki",
-        "title": "MES Reference Library: Sync Wiki from MES Source",
+        "title": "MES Reference Library: Sync Wiki from MES-WebWiki",
         "category": "MES Reference",
         "icon": "$(sync)"
       },
@@ -178,21 +178,23 @@
         "mesReference.mesSourcePath": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Optional **offline fallback** path to a local `ModularEncountersSystems` folder (must contain `ProfileManager.cs`). **You do not need to set this manually.** Sync always tries GitHub first. When GitHub fails, the extension auto-searches workshop and local mod installs, then prompts you to pick a folder if nothing is found. This setting stores the last chosen path for faster fallback next time."
+          "markdownDescription": "Optional **offline fallback** path to a local `ModularEncountersSystems` folder (must contain `ProfileManager.cs`). Used when GitHub is unavailable during sync to update the **validator tag index**. Sync auto-searches workshop and local mod installs before prompting you to pick a folder."
         },
         "mesReference.syncOnFirstRun": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Run a **one-time** background wiki sync the first time the extension activates after install. Uses GitHub when online (no folder picker). After that, use **⟳ Sync** manually to stay up to date."
+          "markdownDescription": "Run a **one-time** background sync the first time the extension activates after install. Downloads wiki markdown from [MES-WebWiki](https://github.com/Raidfire85/MES-WebWiki) and updates validator data from MES source when online. The bundled wiki works without sync."
         }
       }
     }
   },
   "scripts": {
+    "vendor-sync": "node ./scripts/vendor-sync.mjs",
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "compile": "npm run vendor-sync && tsc -p ./ && node ./scripts/build-wiki-from-md.mjs",
     "watch": "tsc -watch -p ./",
-    "build-vsix": "powershell -ExecutionPolicy Bypass -File ./scripts/archive-old-vsix.ps1 && node --disable-warning=DEP0040 --disable-warning=DEP0169 ./node_modules/@vscode/vsce/vsce package --no-dependencies --allow-missing-repository",
+    "build-vsix": "powershell -ExecutionPolicy Bypass -File ./scripts/archive-old-vsix.ps1 && node --disable-warning=DEP0040 --disable-warning=DEP0169 ./node_modules/@vscode/vsce/vsce package --allow-missing-repository",
+    "publish:marketplace": "node --disable-warning=DEP0040 --disable-warning=DEP0169 ./node_modules/@vscode/vsce/vsce publish --allow-missing-repository",
     "rebuild-tag-index": "npm run compile && node ./scripts/rebuild-tag-index.cjs",
     "validate-mod": "npm run compile && node ./scripts/validate-mod.cjs",
     "test-parser": "npm run compile && node ./scripts/test-sbc-parser.cjs",
@@ -200,7 +202,12 @@
     "generate-icons": "powershell -ExecutionPolicy Bypass -File ./scripts/generate-icons.ps1",
     "install-extension": "powershell -ExecutionPolicy Bypass -File ./scripts/install-extension.ps1"
   },
+  "dependencies": {
+    "markdown-it": "^14.1.0",
+    "yaml": "^2.6.0"
+  },
   "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
     "@types/node": "^20.11.0",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.2.1",

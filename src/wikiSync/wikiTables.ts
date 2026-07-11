@@ -1,6 +1,8 @@
 import { WikiTableStyle } from './constants';
 import { TagMetaMap } from './tagMetaParser';
-import { getTypeHint, inferDescription } from './typeHints';
+import { getTypeHint } from './typeHints';
+import { inferRichDescription } from './tagDescriptionGenerator';
+import { resolveSyncSectionCopy, SyncSectionContext } from './syncSectionCopy';
 
 export function buildWikiTagTable(
   tagName: string,
@@ -86,7 +88,7 @@ export function buildTagTableFromMeta(
   const hint = getTypeHint(parseType);
   const multipleAllowed = hint.multipleAllowed ? 'Yes' : 'No';
   const description =
-    tagDescriptions[tagName] ?? inferDescription(tagName, parseType);
+    tagDescriptions[tagName] ?? inferRichDescription(tagName, parseType);
 
   return buildWikiTagTable(
     tagName,
@@ -133,7 +135,7 @@ function backfillNanDescriptionsInFragment(
     let updated = tableHtml;
 
     if (/(<td align="left">Description:<\/td>\s*<td align="left">)nan(<\/td>)/i.test(updated)) {
-      const description = tagDescriptions[tag] ?? inferDescription(tag, parseType);
+      const description = tagDescriptions[tag] ?? inferRichDescription(tag, parseType);
       if (description && description !== 'nan') {
         updated = updated.replace(
           /(<td align="left">Description:<\/td>\s*<td align="left">)nan(<\/td>)/i,
@@ -151,8 +153,13 @@ function backfillNanDescriptionsInFragment(
   });
 }
 
-export function buildSupplementHeader(): string {
+export function buildSupplementHeader(context: SyncSectionContext): string {
+  const copy = resolveSyncSectionCopy(context);
+  const heading = copy.heading
+    ? `<div class="markdown-heading"><h2 class="heading-element">${copy.heading} (MES Source Sync)</h2></div>`
+    : `<div class="markdown-heading"><h2 class="heading-element">Additional Tags (MES Source Sync)</h2></div>`;
+
   return `<div class="mes-wiki-sync-section">
-<div class="markdown-heading"><h2 class="heading-element">Additional Tags (MES Source Sync)</h2></div>
-<p>The tags below exist in the current MES workshop/GitHub source but were not present in the original MeridiusIX wiki page. Descriptions are generated from MES source code (ActionSystem handlers, profile fields, and tag naming).</p>`;
+${heading}
+<p>${copy.intro}</p>`;
 }

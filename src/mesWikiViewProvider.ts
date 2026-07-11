@@ -121,6 +121,7 @@ export class MesWikiViewProvider implements vscode.WebviewViewProvider {
     hash?: string;
     query?: string;
     searchTerm?: string;
+    url?: string;
   }): Promise<void> {
     switch (message.type) {
       case 'navigate':
@@ -158,6 +159,11 @@ export class MesWikiViewProvider implements vscode.WebviewViewProvider {
         break;
       case 'search':
         await this.handleSearch(message.query ?? '');
+        break;
+      case 'openExternal':
+        if (message.url) {
+          await vscode.env.openExternal(vscode.Uri.parse(message.url));
+        }
         break;
     }
   }

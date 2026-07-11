@@ -1,52 +1,54 @@
 # MES Reference Library
 
-Offline **Modular Encounter Systems (MES)** and **RivalAI** wiki reference for [VS Code](https://code.visualstudio.com/) and [Cursor](https://cursor.com/), with **GitHub wiki sync** and built-in **SBC validation** for mod authors.
+Offline **Modular Encounter Systems (MES)** and **RivalAI** wiki reference for [VS Code](https://code.visualstudio.com/) and [Cursor](https://cursor.com/), with optional **GitHub sync** and built-in **SBC validation** for Space Engineers mod authors.
 
 > **Unofficial community tool** — not affiliated with or endorsed by MeridiusIX.
 
-Documentation is bundled locally — **no internet required** to browse the wiki after install. **Sync requires an internet connection** to download MES script definitions from GitHub (or use a local source path instead).
+The full wiki is **bundled locally** — **no internet required** to browse, search, or validate after install. **Sync is optional** and updates the wiki from the community [MES-WebWiki](https://github.com/Raidfire85/MES-WebWiki) repository (refreshed weekly on GitHub).
 
-**Current release:** `3.15.5`
+**Current release:** `3.18.4`
 
 ## Features
 
 ### Wiki reference panel
 
-- Sidebar **MES Reference** panel with the full MES/RivalAI wiki (~76 pages)
+- Sidebar **MES Reference** panel with the full MES/RivalAI community wiki (~80+ pages)
 - **Search** across all wiki pages
 - **Back / forward** navigation, **refresh**, and **bookmarks**
-- Wiki links open inside the panel
+- Wiki links open inside the panel (no external browser needed)
 - Sticky toolbar on every page: search, validate, sync, navigation, and bookmarks
+- Nested sidebar navigation matching the WebWiki structure (e.g. Economy & Station Blocks)
 
-### Wiki sync from MES source
+### Wiki sync from MES-WebWiki
 
-> **Internet required.** Sync contacts `api.github.com` and `raw.githubusercontent.com`. Wiki browsing, search, bookmarks, and SBC validation work fully offline.
+> **Internet required for sync.** Sync contacts `api.github.com` and `raw.githubusercontent.com`. Wiki browsing, search, bookmarks, and SBC validation work fully offline with the bundled wiki.
 
-Keep tag documentation aligned with the latest MES release. Click **⟳ Sync** in the wiki toolbar or run **MES Reference Library: Sync Wiki from MES Source** from the Command Palette.
+Click **⟳ Sync** in the wiki toolbar or run **MES Reference Library: Sync Wiki from MES-WebWiki** from the Command Palette.
 
-On **first install**, the extension runs a **one-time background sync** automatically (when online). After that, use **⟳ Sync** yourself to stay current. Disable with **`mesReference.syncOnFirstRun`** if you prefer fully manual updates.
+On **first install**, the extension runs a **one-time background sync** automatically when online. After that, use **⟳ Sync** yourself to stay current. Disable with **`mesReference.syncOnFirstRun`** if you prefer fully manual updates.
 
-Sync downloads only `Data/Scripts/ModularEncountersSystems` from [MeridiusIX/Modular-Encounters-Systems](https://github.com/MeridiusIX/Modular-Encounters-Systems) on GitHub (`master` branch) — not the full repo.
+**Wiki content** is downloaded from [Raidfire85/MES-WebWiki](https://github.com/Raidfire85/MES-WebWiki) (`main` branch):
 
-Sync **always tries GitHub first** when you have internet. If GitHub fails, sync **automatically searches** for a local `ModularEncountersSystems` folder, then **prompts you to pick a folder** if nothing is found (and saves it for next time).
+- `docs/*.md` — community wiki markdown (auto-updated weekly on GitHub)
+- `mkdocs.yml` — sidebar/navigation structure
+- Built locally into offline HTML pages inside the extension
 
-Auto-search order:
+If GitHub is unreachable, the **bundled wiki keeps working** — sync fails gracefully and you can try again later.
+
+**Validator data** (separate from wiki pages) is updated from [MeridiusIX/Modular-Encounters-Systems](https://github.com/MeridiusIX/Modular-Encounters-Systems) (`master` branch):
+
+- Downloads `Data/Scripts/ModularEncountersSystems` for profile headers and tag metadata
+- Updates `profile-tag-index.json` used by the SBC validator
+- GitHub is tried first; if unavailable, sync auto-searches workshop/local MES installs or prompts for a folder
+
+Auto-search order for MES source fallback:
+
 1. **`mesReference.mesSourcePath`** (if previously saved)
 2. **Steam workshop MES** install
 3. **Other workshop/local mod** folders containing `Data/Scripts/ModularEncountersSystems`
 4. **Folder picker** — if nothing above is found, you are prompted to choose the folder manually
 
-What sync does:
-
-- **Supplements existing wiki pages** — Adds an *Undocumented Tags (from MES source)* section to 16 core pages (Action, Target, Trigger, Spawning Conditions, Weapons, and others) when the source defines tags not yet in the Meridius wiki
-- **Auto-discovers profile files** — Scans `*Profile.cs` in the MES source, reads profile headers from `ProfileManager.cs`, and creates wiki pages for profiles that have no Meridius documentation yet (e.g. Shipyard, Store, Mission, Contract Block, Faction Icon, Prefab Gravity, Suit Upgrades)
-- **Updates sidebars** — Inserts links to auto-managed profile pages in the wiki sidebar on every page
-- **Refreshes the validator** — Newly discovered profile headers (e.g. `[MES Shipyard]`) are recognized immediately after sync
-- **Idempotent** — Only writes files when content actually changes; a second sync with no upstream changes reports *already up to date*
-
-Optional **`mesReference.mesSourcePath`**: offline fallback folder (must contain `ProfileManager.cs`). Sync still uses GitHub when online.
-
-### Setting the offline fallback path
+### Setting the offline MES source path
 
 | Method | How |
 |--------|-----|
@@ -71,7 +73,7 @@ Checks include:
 - **GPS / Vector3D** — coordinate format such as `[Coordinates:{X:1 Y:1 Z:1}]`
 - **MES profile references** — cross-file SubtypeId lookup across your mod's entire **`Data`** folder tree
 - **Linked assets** — audio SubtypeIds (`[ChatAudio:…]`), container types (`[ContainerTypes:…]`, `[LootContainerSubtypeId:…]`), and spawn group prefabs (`<Prefab SubtypeId="…">`) validated against definitions in your mod's audio, `ContainerTypes`, and `Prefabs` .sbc files
-- **Discovered profiles** — headers found by wiki sync are included alongside the static profile list
+- **Discovered profiles** — headers found by sync are included alongside the static profile list
 
 Diagnostics appear as squiggles in the editor with **fix hints** in the Problems panel. Use **Open Wiki** after validating to jump to relevant documentation.
 
@@ -102,11 +104,15 @@ Available as **Quick Fix** (lightbulb) in the editor and **Apply** buttons in th
 
 ## Installation
 
-Install from a VSIX (do **not** double-click the file — that opens Visual Studio's installer).
+### From the Marketplace (recommended)
 
-### From GitHub Releases (recommended)
+Search for **MES Reference Library** in the VS Code or Cursor Extensions view and click **Install**.
 
-1. Open the [Releases](https://github.com/Raidfire85/mes-reference-library/releases) page and download `mes-reference-library-3.15.5.vsix` from the latest release.
+Or open: [MES Reference Library on the Visual Studio Marketplace](https://marketplace.visualstudio.com/search?term=mes%20reference%20library&target=VSCode&category=All%20categories&sortBy=Relevance)
+
+### From GitHub Releases
+
+1. Open the [Releases](https://github.com/Raidfire85/MES-Reference-Library/releases) page and download the latest `mes-reference-library-*.vsix`.
 2. In VS Code or Cursor: **Extensions** → **⋯** menu → **Install from VSIX...**
 3. Select the downloaded file and **reload the window**.
 
@@ -116,7 +122,7 @@ Install from a VSIX (do **not** double-click the file — that opens Visual Stud
 
 ```powershell
 $env:NODE_OPTIONS = "--disable-warning=DEP0040 --disable-warning=DEP0169"
-cursor --install-extension "path\to\mes-reference-library-3.15.5.vsix"
+cursor --install-extension "path\to\mes-reference-library-3.18.4.vsix"
 ```
 
 For VS Code, use `code` instead of `cursor`.
@@ -138,7 +144,7 @@ This builds if needed, picks the newest `.vsix` in the repo root, and installs i
 3. Open any `.sbc` file — validation runs automatically.
 4. Hover squiggles for details and fix hints; use Quick Fix where offered.
 5. Run **Validate Mod** to get a full report across your `Data` folder.
-6. Run **Sync** when you want tag tables and profile pages updated from the latest MES source. GitHub is tried first; offline fallback uses `mesReference.mesSourcePath` or auto-detected workshop/local MES installs.
+6. Run **⟳ Sync** when you want the latest wiki from MES-WebWiki and updated validator tag data from MES source.
 
 ## Commands
 
@@ -149,7 +155,7 @@ This builds if needed, picks the newest `.vsix` in the repo root, and installs i
 | **MES Reference Library: Show Bookmarks** | Pick a bookmarked wiki page |
 | **MES Reference Library: Validate Current SBC** | Validate the active `.sbc` file |
 | **MES Reference Library: Validate Mod (All SBC in Data)** | Scan the mod `Data` folder and open the validation report |
-| **MES Reference Library: Sync Wiki from MES Source** | Download MES scripts from GitHub (or offline fallback) and update wiki pages, sidebars, and validator profiles |
+| **MES Reference Library: Sync Wiki from MES-WebWiki** | Download wiki markdown from MES-WebWiki and rebuild pages; update validator tag index from MES source |
 | **MES Reference Library: Set MES Source Path (Offline Fallback)** | Choose a local `ModularEncountersSystems` folder for when GitHub is unavailable |
 | **MES Reference Library: Show MES Source Path** | Show configured fallback path or auto-detected local MES install |
 | **MES Reference Library: Clear MES Source Path** | Remove the configured fallback path |
@@ -169,6 +175,17 @@ This builds if needed, picks the newest `.vsix` in the repo root, and installs i
 | **`mesReference.mesSourcePath`** | Offline fallback path to `ModularEncountersSystems`. **Not required** — sync auto-searches workshop/local installs when GitHub fails; you only need this if auto-search cannot find MES (or you pick a folder when prompted). |
 | **`mesReference.syncOnFirstRun`** | Run a one-time background wiki sync on first activation after install (default: `true`). Disable if you prefer fully manual updates. |
 
+## Requirements & limitations
+
+| Requirement | Details |
+|-------------|---------|
+| **Offline use** | Wiki browse, search, bookmarks, and validation work without internet after install |
+| **Sync (optional)** | Requires `api.github.com` and `raw.githubusercontent.com` |
+| **Space Engineers modding** | Designed for `.sbc` mod definition files |
+| **Experimental mode** | MES mods require Experimental Mode in Space Engineers (documented in wiki) |
+
+**Sync does not require** the WebWiki site to be hosted or online — only the GitHub repository. If sync fails, the bundled wiki remains usable.
+
 ## Building from source
 
 ```powershell
@@ -178,6 +195,10 @@ npm run build-vsix
 ```
 
 Output: `mes-reference-library-<version>.vsix` in the repo root. Previous builds are moved to `oldver/` automatically.
+
+### Publishing to the Marketplace
+
+See [PUBLISHING.md](PUBLISHING.md) for step-by-step instructions.
 
 ### Developer scripts
 
@@ -202,7 +223,7 @@ Copyright (c) 2026 **raidfire** — the VS Code/Cursor extension code (TypeScrip
 
 **Unofficial community tool** — not affiliated with or endorsed by MeridiusIX.
 
-The offline wiki pages and related tag descriptions are based on [Modular Encounter Systems / RivalAI documentation](https://github.com/MeridiusIX/Modular-Encounters-Systems) and are attributed to **MeridiusIX** and [GitHub contributors](https://github.com/MeridiusIX/Modular-Encounters-Systems/graphs/contributors), including:
+The offline wiki pages are sourced from the community [MES-WebWiki](https://github.com/Raidfire85/MES-WebWiki) project, which mirrors and extends documentation from [Modular Encounter Systems / RivalAI](https://github.com/MeridiusIX/Modular-Encounters-Systems). Original documentation is attributed to **MeridiusIX** and [GitHub contributors](https://github.com/MeridiusIX/Modular-Encounters-Systems/graphs/contributors), including:
 
 | Contributor | Contributor |
 |-------------|-------------|
@@ -215,6 +236,6 @@ The offline wiki pages and related tag descriptions are based on [Modular Encoun
 | Blaylock1988 | SpruceMarcy |
 | StalkR | *(and others)* |
 
-Sync supplements are generated from C# profile definitions in the same repository. The upstream MES project does not ship a separate license file; this extension redistributes documentation with attribution for offline reference use.
+Validator tag metadata is generated from C# profile definitions in the MES source repository. The upstream MES project does not ship a separate license file; this extension redistributes documentation with attribution for offline reference use.
 
 If you are a contributor and would like your name added or adjusted, open an issue on this extension's repository.

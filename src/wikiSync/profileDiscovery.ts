@@ -1,38 +1,26 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { findProfileFile } from './tagMetaParser';
-import { getTagMetaFromSource, TagMetaMap } from './tagMetaParser';
-import { NEW_PROFILE_PAGES, PAGE_MAP } from './constants';
+import { findProfileFile, getTagMetaFromSource, TagMetaMap } from './tagMetaParser';
+import {
+  MERIDIUS_WIKI_PROFILE_HTML,
+  NEW_PROFILE_PAGES,
+  PAGE_MAP,
+  SYNC_START,
+} from './constants';
 import {
   DiscoveredProfile,
   loadDiscoveredProfilesFile,
   saveDiscoveredProfilesFile,
 } from './discoveredProfiles';
 import { STATIC_PROFILE_HEADERS } from '../sbc/profileHeaders';
+import { inferProfileBlurbFromSource } from './profileBlurbGenerator';
+import { getProfileHtmlFile, isPublisherManagedProfilePage } from './profilePlacements';
 
 const PROFILE_MANAGER = 'ProfileManager.cs';
-
-/** Profile .cs files whose tags are documented on an existing Meridius wiki page. */
-const MERIDIUS_WIKI_FOR_PROFILE_CS: Record<string, string> = {
-  'BlockReplacementProfile.cs': 'Block-Replacement-Profiles.html',
-  'DerelictionProfile.cs': 'Dereliction.html',
-  'EventProfile.cs': 'Event.html',
-  'LootProfile.cs': 'Loot.html',
-  'ManipulationProfile.cs': 'Manipulation.html',
-  'ReplenishmentProfile.cs': 'Replenishment.html',
-  'TriggerGroupProfile.cs': 'Trigger-Group.html',
-  'WaypointProfile.cs': 'Waypoint.html',
-  'WeaponModRulesProfile.cs': 'Weapon-Mod-Rules.html',
-  'ZoneConditionsProfile.cs': 'Zone-Conditions.html',
-};
-
 const RUNTIME_ONLY_PROFILE_CS = new Set(['EventGroupProfile.cs']);
 
 const KNOWN_PROFILE_BLURBS: Record<string, string> = Object.fromEntries(
-  NEW_PROFILE_PAGES.map((p) => [
-    p.profile,
-    p.blurb,
-  ])
+  NEW_PROFILE_PAGES.map((page) => [page.profile, page.blurb])
 );
 
 export function getPageMapProfileCsFiles(): Set<string> {
@@ -44,8 +32,6 @@ export function getPageMapProfileCsFiles(): Set<string> {
   }
   return handled;
 }
-
-const AUTO_MANAGED_HTML = new Set(NEW_PROFILE_PAGES.map((page) => page.file));
 
 export async function findAllProfileCsFiles(mesSourcePath: string): Promise<string[]> {
   const files: string[] = [];
@@ -143,13 +129,35 @@ export function isInternalProfileDuplicate(profileCs: string, handled: Set<strin
   return variants.some((variant) => handled.has(variant));
 }
 
+function profileConfigForCs(profileCs: string) {
+  return NEW_PROFILE_PAGES.find((page) => page.profile === profileCs);
+}
+
+async function buildBlurb(
+  mesSourcePath: string,
+  profileCs: string,
+  header: string | null,
+  title: string
+): Promise<string> {
+  if (KNOWN_PROFILE_BLURBS[profileCs]) {
+    return KNOWN_PROFILE_BLURBS[profileCs];
+  }
+
+  return inferProfileBlurbFromSource(mesSourcePath, profileCs, header, title);
+}
+
 function shouldSkipExistingWikiPage(
+  profileCs: string,
   htmlFile: string,
   header: string | null,
   wikiFiles: Set<string>,
   discoveredHtmlFiles: Set<string>
 ): boolean {
-  if (AUTO_MANAGED_HTML.has(htmlFile) || discoveredHtmlFiles.has(htmlFile)) {
+  if (discoveredHtmlFiles.has(htmlFile)) {
+    return false;
+  }
+
+  if (isPublisherManagedProfilePage(profileCs, htmlFile)) {
     return false;
   }
 
@@ -165,11 +173,7 @@ function shouldSkipExistingWikiPage(
   return false;
 }
 
-function profileConfigForCs(profileCs: string): (typeof NEW_PROFILE_PAGES)[number] | undefined {
-  return NEW_PROFILE_PAGES.find((page) => page.profile === profileCs);
-}
-
-export async function discoverAutoManagedProfiles(
+export async function discoverWebWikiProfiles(
   mesSourcePath: string,
   wikiDir: string
 ): Promise<DiscoveredProfile[]> {
@@ -179,7 +183,11 @@ export async function discoverAutoManagedProfiles(
     (await fs.readdir(wikiDir)).filter((file) => file.endsWith('.html'))
   );
   const existingDiscovered = await loadDiscoveredProfilesFile(wikiDir);
-  const discoveredHtmlFiles = new Set(existingDiscovered.profiles.map((p) => p.htmlFile));
+  const discoveredHtmlFiles = new Set(
+    existingDiscovered.profiles.map((profile) =>
+      getProfileHtmlFile(profile.profileCs, profile.htmlFile, profile.header)
+    )
+  );
   const profileCsFiles = await findAllProfileCsFiles(mesSourcePath);
 
   const candidateCs = new Set<string>();
@@ -212,21 +220,34 @@ export async function discoverAutoManagedProfiles(
     const knownPage = profileConfigForCs(profileCs);
     const header = resolveHeaderForProfile(profileCs, managerHeaders);
     const htmlFile = knownPage?.file ?? profileCsToHtmlFile(profileCs);
+    const resolvedHtmlFile = getProfileHtmlFile(profileCs, htmlFile, header);
+    const title = knownPage?.title ?? profileCsToTitle(profileCs);
 
-    if (MERIDIUS_WIKI_FOR_PROFILE_CS[profileCs] && wikiFiles.has(MERIDIUS_WIKI_FOR_PROFILE_CS[profileCs])) {
-      continue;
+    const meridiusHtml = MERIDIUS_WIKI_PROFILE_HTML[profileCs];
+    if (meridiusHtml && wikiFiles.has(meridiusHtml) && meridiusHtml === resolvedHtmlFile) {
+      const meridiusPath = path.join(wikiDir, meridiusHtml);
+      try {
+        const meridiusContent = await fs.readFile(meridiusPath, 'utf8');
+        if (!meridiusContent.includes(SYNC_START)) {
+          continue;
+        }
+      } catch {
+        continue;
+      }
     }
 
-    if (shouldSkipExistingWikiPage(htmlFile, header, wikiFiles, discoveredHtmlFiles)) {
+    if (
+      shouldSkipExistingWikiPage(profileCs, resolvedHtmlFile, header, wikiFiles, discoveredHtmlFiles)
+    ) {
       continue;
     }
 
     results.push({
       profileCs,
       header,
-      htmlFile,
-      title: knownPage?.title ?? profileCsToTitle(profileCs),
-      blurb: buildBlurb(profileCs, header),
+      htmlFile: resolvedHtmlFile,
+      title,
+      blurb: await buildBlurb(mesSourcePath, profileCs, header, title),
       tagCount: Object.keys(meta).length,
       author: 'MeridiusIX',
     });
@@ -235,28 +256,15 @@ export async function discoverAutoManagedProfiles(
   return results;
 }
 
-/** @deprecated Use discoverAutoManagedProfiles */
-export async function discoverNewProfiles(
+/** @deprecated Use discoverWebWikiProfiles */
+export async function discoverAutoManagedProfiles(
   mesSourcePath: string,
   wikiDir: string
 ): Promise<DiscoveredProfile[]> {
-  return discoverAutoManagedProfiles(mesSourcePath, wikiDir);
+  return discoverWebWikiProfiles(mesSourcePath, wikiDir);
 }
 
-function buildBlurb(profileCs: string, header: string | null): string {
-  if (KNOWN_PROFILE_BLURBS[profileCs]) {
-    return KNOWN_PROFILE_BLURBS[profileCs];
-  }
-
-  const title = profileCsToTitle(profileCs);
-  if (header) {
-    return `${title} profiles use the ${header} header in SBC Description blocks.`;
-  }
-
-  return `${title} profile tags parsed from MES source.`;
-}
-
-export { saveDiscoveredProfilesFile } from './discoveredProfiles';
+export { saveDiscoveredProfilesFile };
 
 export async function getTagMetaForProfile(
   mesSourcePath: string,

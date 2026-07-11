@@ -6,8 +6,8 @@ scripts/**
 tsconfig.json
 **/*.map
 **/*.ts
-node_modules/**
 tools/**
+wiki-src/**
 *.vsix
 *-validation-report.json
 *.xps

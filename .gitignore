@@ -2,6 +2,9 @@ out/
 node_modules/
 *.vsix
 oldver/
+wiki-src/
+src/**/*.js
+src/**/*.js.map
 *-validation-report.json
 tools/.mes-github-cache/
 .DS_Store

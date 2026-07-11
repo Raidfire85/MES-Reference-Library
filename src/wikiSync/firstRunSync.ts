@@ -109,7 +109,7 @@ export async function runFirstRunSyncIfNeeded(
     });
   } catch {
     void vscode.window.showInformationMessage(
-      'MES Reference: first-time wiki sync could not reach GitHub or a local MES install. The bundled wiki is ready to use — click ⟳ Sync when you are online to update.'
+      'MES Reference: first-time wiki sync could not reach MES-WebWiki on GitHub. The bundled wiki is ready to use — click ⟳ Sync when you are online to update.'
     );
   } finally {
     await context.globalState.update(FIRST_RUN_SYNC_KEY, true);

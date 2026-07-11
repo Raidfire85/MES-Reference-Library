@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 import { Uri, Webview } from 'vscode';
 import { getWikiUri } from './wikiPaths';
+import { localizeHtmlContent } from './wikiSync/localLinkMap';
 
 export interface RenderPageOptions {
   highlightTerm?: string;
@@ -20,6 +21,9 @@ export async function renderWikiPage(
   const wikiUri = getWikiUri(extensionUri);
   const filePath = Uri.joinPath(wikiUri, fileName);
   let html = await fs.readFile(filePath.fsPath, 'utf8');
+
+  const wikiFiles = await listWikiHtmlFiles(wikiUri);
+  html = localizeHtmlContent(html, wikiFiles);
 
   const cssUri = webview.asWebviewUri(Uri.joinPath(wikiUri, 'mes-wiki.css'));
   html = html.replace(/href="mes-wiki\.css"/gi, `href="${cssUri}"`);
@@ -125,7 +129,7 @@ function buildToolbar(options: RenderPageOptions): string {
   <button id="mes-ref-refresh" title="Refresh">↻</button>
   <button id="mes-ref-validate" title="Validate Current SBC">✓</button>
   <button id="mes-ref-validate-mod" title="Validate All SBC in Mod Data">✓ Mod</button>
-  <button id="mes-ref-sync" title="Sync Wiki from GitHub (MES master)">⟳</button>
+  <button id="mes-ref-sync" title="Sync Wiki from MES-WebWiki (GitHub)">⟳</button>
   <button id="mes-ref-bookmark" class="${bookmarkClass}" title="Bookmark this page">${bookmarkIcon}</button>
   <button id="mes-ref-bookmarks" title="View bookmarks">★ ${options.bookmarkCount}</button>
 </div>
@@ -192,6 +196,12 @@ function buildScripts(highlightTerm?: string, scrollToHash?: string): string {
       const fileName = href.split('#')[0].split('?')[0];
       const hash = href.includes('#') ? href.substring(href.indexOf('#')) : '';
       post('navigate', { fileName: fileName, hash: hash });
+      return;
+    }
+
+    if (/^https?:\\/\\//i.test(href)) {
+      e.preventDefault();
+      post('openExternal', { url: href });
     }
   });
 
@@ -242,4 +252,9 @@ function buildScripts(highlightTerm?: string, scrollToHash?: string): string {
   }
 })();
 </script>`;
+}
+
+async function listWikiHtmlFiles(wikiUri: Uri): Promise<string[]> {
+  const entries = await fs.readdir(wikiUri.fsPath);
+  return entries.filter((file) => file.endsWith('.html'));
 }
