@@ -1,11 +1,11 @@
 # Publishing MES Reference Library to the VS Code Marketplace
 
-This guide covers publishing `raidfire.mes-reference-library` to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/). The same listing is used by VS Code, Cursor, and other compatible editors.
+This guide covers publishing `Raidfire.mes-reference-library` to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/). The same listing is used by VS Code, Cursor, and other compatible editors.
 
 ## Prerequisites
 
 1. **Microsoft account** — the same one you use for Azure DevOps / Visual Studio
-2. **Publisher ID** — you already use `raidfire` in `package.json`
+2. **Publisher ID** — use `Raidfire` in `package.json`
 3. **Node.js** — to build and publish
 4. **Repository** — public GitHub repo (already configured)
 
@@ -16,7 +16,7 @@ This guide covers publishing `raidfire.mes-reference-library` to the [Visual Stu
 1. Go to [Marketplace Publisher Management](https://marketplace.visualstudio.com/manage)
 2. Sign in with your Microsoft account
 3. Click **Create publisher**
-4. Set **Publisher ID** to `raidfire` (must match `package.json` → `"publisher"`)
+4. Set **Publisher ID** to `Raidfire` (must match `package.json` → `"publisher"`)
 5. Fill in display name and contact details
 
 ### 2. Create a Personal Access Token (PAT)
@@ -37,7 +37,7 @@ From the repo root:
 
 ```powershell
 cd "C:\Users\Raidfire\source\repos\VS MES Reference Library"
-npx vsce login raidfire
+npx vsce login Raidfire
 ```
 
 Paste your PAT when prompted.
@@ -137,15 +137,15 @@ The Marketplace uses these fields automatically:
 - [ ] Icon looks good at small size in the Extensions view
 - [ ] Tested install from VSIX on a clean profile
 - [ ] PAT is valid and not expired
-- [ ] Publisher ID `raidfire` exists on marketplace.visualstudio.com
+- [ ] Publisher ID `Raidfire` exists on marketplace.visualstudio.com
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
-| `ERROR You must be logged in` | Run `npx vsce login raidfire` or set `VSCE_PAT` |
+| `ERROR You must be logged in` | Run `npx vsce login Raidfire` or set `VSCE_PAT` |
 | `ERROR Extension version is not semver` | Fix `package.json` version format |
-| `ERROR A extension with this ID already exists` | You need to publish under the same publisher that owns `raidfire.mes-reference-library` |
+| `ERROR A extension with this ID already exists` | You need to publish under the same publisher that owns `Raidfire.mes-reference-library` |
 | `403 Forbidden` | PAT missing **Marketplace → Manage** scope, or wrong publisher |
 | Package too large | Normal for bundled wiki; avoid adding unnecessary files to `.vscodeignore` exclusions |
 
