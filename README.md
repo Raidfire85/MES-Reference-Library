@@ -6,7 +6,7 @@ Offline **Modular Encounter Systems (MES)** and **RivalAI** wiki reference for [
 
 The full wiki is **bundled locally** — **no internet required** to browse, search, or validate after install. **Sync is optional** and updates the wiki from the community [MES-WebWiki](https://github.com/Raidfire85/MES-WebWiki) repository (refreshed weekly on GitHub).
 
-**Current release:** `3.19.3`
+**Current release:** `3.19.4`
 
 ## Features
 
@@ -122,7 +122,7 @@ Or open: [MES Reference Library on the Visual Studio Marketplace](https://market
 
 ```powershell
 $env:NODE_OPTIONS = "--disable-warning=DEP0040 --disable-warning=DEP0169"
-cursor --install-extension "path\to\mes-reference-library-3.19.3.vsix"
+cursor --install-extension "path\to\mes-reference-library-3.19.4.vsix"
 ```
 
 For VS Code, use `code` instead of `cursor`.

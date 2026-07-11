@@ -2,6 +2,15 @@
 
 All notable changes to the MES Reference Library extension are documented here.
 
+## [3.19.4] - 2026-07-12
+
+### Fixed
+
+- **Validate Mod** no longer fails silently: errors are shown in a notification if validation crashes.
+- Skips oversized `.sbc` files (> 50 MB, usually world saves) instead of hitting Node's 2 GiB read limit.
+- Warns when no `.sbc` files are found under the selected `Data` folder.
+- Validation report tab is revealed more reliably; completion message points to the **MES Mod Validation** panel.
+
 ## [3.19.3] - 2026-07-12
 
 ### Changed

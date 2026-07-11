@@ -55,6 +55,7 @@ export interface ModValidationReport {
   skippedNonMesFileCount: number;
   skippedNonMesByCategory: SkippedNonMesCategorySummary[];
   skippedNonMesFiles: SkippedNonMesFile[];
+  skippedOversizedFiles: Array<{ relativePath: string; sizeLabel: string }>;
   filesWithIssues: ModValidationFileResult[];
   crossFileDuplicates: CrossFileDuplicateSubtype[];
   generatedAt: string;
@@ -144,7 +145,8 @@ export async function buildModValidationReport(
   fileContents: Map<string, string>,
   registry: TagRegistry,
   profileTagIndex: ProfileTagIndex | null,
-  openFileCount: number
+  openFileCount: number,
+  skippedOversizedFiles: Array<{ relativePath: string; sizeLabel: string }> = []
 ): Promise<ModValidationReport> {
   const sources = new Map<string, string>();
   for (const filePath of filePaths) {
@@ -261,6 +263,7 @@ export async function buildModValidationReport(
     skippedNonMesFileCount: skippedNonMesFiles.length,
     skippedNonMesByCategory,
     skippedNonMesFiles,
+    skippedOversizedFiles,
     filesWithIssues,
     crossFileDuplicates,
     generatedAt: new Date().toISOString(),

@@ -66,6 +66,7 @@ export class ModValidationReportPanel implements vscode.Disposable {
       wikiProvider,
       fixHandler
     );
+    ModValidationReportPanel.currentPanel.panel.reveal(vscode.ViewColumn.Beside, false);
     return ModValidationReportPanel.currentPanel;
   }
 
@@ -146,6 +147,20 @@ export class ModValidationReportPanel implements vscode.Disposable {
             const fileLabel = category.fileCount === 1 ? '1 file' : `${category.fileCount} files`;
             return `<li><span class="category-name">${escapeHtml(category.kindLabel)}</span> <span class="category-meta">${fileLabel}${indexed}</span></li>`;
           })
+          .join('')}</ul>
+      </section>`;
+
+    const oversizedSection =
+      report.skippedOversizedFiles.length === 0
+        ? ''
+        : `<section class="section skipped-section">
+        <h2>Skipped oversized .sbc files (${report.skippedOversizedFiles.length})</h2>
+        <p class="lead">These files exceed the 50 MB read limit (usually world saves copied into a mod folder, not mod definitions).</p>
+        <ul class="category-list">${report.skippedOversizedFiles
+          .map(
+            (file) =>
+              `<li><span class="category-name">${escapeHtml(file.relativePath)}</span> <span class="category-meta">${escapeHtml(file.sizeLabel)}</span></li>`
+          )
           .join('')}</ul>
       </section>`;
 
@@ -331,6 +346,7 @@ export class ModValidationReportPanel implements vscode.Disposable {
   </div>
   ${cleanNote}
   ${skippedSection}
+  ${oversizedSection}
   ${duplicateSection}
   ${hasIssues ? fileSections : `<p>No tag, reference, or profile issues found in MES profile files.${report.skippedNonMesFileCount > 0 ? ` ${report.skippedNonMesFileCount} non-MES .sbc file(s) skipped (see categories above).` : ''}</p>`}
   <script>

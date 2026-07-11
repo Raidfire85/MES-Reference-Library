@@ -14,6 +14,9 @@ import { SbcCodeActionProvider } from './sbcCodeActionProvider';
 import { refreshDiscoveredHeaders } from './wikiSync/refreshDiscoveredHeaders';
 import { MesWikiViewProvider } from './mesWikiViewProvider';
 
+/** Mod definition .sbc files are small; world saves can be multi-GB and must not be read whole. */
+const MAX_SBC_READ_BYTES = 50 * 1024 * 1024;
+
 export class SbcValidatorService implements vscode.Disposable {
   private readonly diagnostics = vscode.languages.createDiagnosticCollection('mesReference');
   private registry?: TagRegistry;
@@ -178,20 +181,37 @@ export class SbcValidatorService implements vscode.Disposable {
         title: 'MES Reference: Validating mod',
         cancellable: false,
       },
-      async () => this.runModValidation(dataRoot)
+      async () => {
+        try {
+          return await this.runModValidation(dataRoot);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          void vscode.window.showErrorMessage(`MES mod validation failed: ${message}`);
+          return null;
+        }
+      }
     );
   }
 
   private async runModValidation(dataRoot: string): Promise<ModValidationReport> {
     const { registry, profileTagIndex } = await this.getValidationContextInternal();
-    const { filePaths, fileContents, openFileCount } = await this.loadModSbcSources(dataRoot);
+    const { filePaths, fileContents, openFileCount, skippedOversizedFiles } =
+      await this.loadModSbcSources(dataRoot);
+
+    if (filePaths.length === 0) {
+      void vscode.window.showWarningMessage(
+        `MES mod validation: no .sbc files found under ${dataRoot}.`
+      );
+    }
+
     const report = await buildModValidationReport(
       dataRoot,
       filePaths,
       fileContents,
       registry,
       profileTagIndex,
-      openFileCount
+      openFileCount,
+      skippedOversizedFiles
     );
 
     for (const file of report.filesWithIssues) {
@@ -214,8 +234,8 @@ export class SbcValidatorService implements vscode.Disposable {
 
     const summary =
       report.errorCount === 0 && report.warningCount === 0
-        ? `MES mod validation: ${report.modName} — all ${report.scannedFileCount} .sbc files passed.`
-        : `MES mod validation: ${report.modName} — ${report.errorCount} error(s), ${report.warningCount} warning(s) in ${report.filesWithIssues.length} file(s).`;
+        ? `MES mod validation: ${report.modName} — all ${report.scannedFileCount} .sbc file(s) passed. Open the "MES Mod Validation" tab if you do not see the report.`
+        : `MES mod validation: ${report.modName} — ${report.errorCount} error(s), ${report.warningCount} warning(s) in ${report.filesWithIssues.length} file(s). Open the "MES Mod Validation" tab for details.`;
 
     if (report.errorCount > 0 || report.warningCount > 0) {
       void vscode.window.showWarningMessage(summary, 'Show Report').then((choice) => {
@@ -302,7 +322,7 @@ export class SbcValidatorService implements vscode.Disposable {
       if (openPaths.has(diskPath.toLowerCase())) {
         continue;
       }
-      sources.set(this.sourceLabelForFile(diskPath, null), await fs.readFile(diskPath, 'utf8'));
+      sources.set(this.sourceLabelForFile(diskPath, null), await this.readSbcFromDiskOrEmpty(diskPath));
     }
 
     if (!sources.has(this.sourceLabelForFile(currentFilePath, null))) {
@@ -316,9 +336,11 @@ export class SbcValidatorService implements vscode.Disposable {
     filePaths: string[];
     fileContents: Map<string, string>;
     openFileCount: number;
+    skippedOversizedFiles: Array<{ relativePath: string; sizeLabel: string }>;
   }> {
     const filePaths = await this.findSbcFiles(dataRoot, true);
     const fileContents = new Map<string, string>();
+    const skippedOversizedFiles: Array<{ relativePath: string; sizeLabel: string }> = [];
     const openPaths = new Set<string>();
     let openFileCount = 0;
 
@@ -342,10 +364,23 @@ export class SbcValidatorService implements vscode.Disposable {
         continue;
       }
 
-      fileContents.set(filePath, await fs.readFile(filePath, 'utf8'));
+      const read = await this.readSbcFromDisk(filePath);
+      if (read.oversizedBytes !== undefined) {
+        skippedOversizedFiles.push({
+          relativePath: path.relative(dataRoot, filePath) || path.basename(filePath),
+          sizeLabel: formatSbcByteSize(read.oversizedBytes),
+        });
+        continue;
+      }
+
+      if (read.content !== undefined) {
+        fileContents.set(filePath, read.content);
+      }
     }
 
-    return { filePaths, fileContents, openFileCount };
+    skippedOversizedFiles.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+
+    return { filePaths, fileContents, openFileCount, skippedOversizedFiles };
   }
 
   invalidateRegistry(): void {
@@ -519,7 +554,7 @@ export class SbcValidatorService implements vscode.Disposable {
       if (openPaths.has(diskPath.toLowerCase())) {
         continue;
       }
-      sources.set(this.sourceLabelForFile(diskPath, null), await fs.readFile(diskPath, 'utf8'));
+      sources.set(this.sourceLabelForFile(diskPath, null), await this.readSbcFromDiskOrEmpty(diskPath));
       diskFileCount++;
     }
 
@@ -564,6 +599,22 @@ export class SbcValidatorService implements vscode.Disposable {
     await walk(root);
     return files;
   }
+
+  private async readSbcFromDisk(
+    filePath: string
+  ): Promise<{ content?: string; oversizedBytes?: number }> {
+    const stat = await fs.stat(filePath);
+    if (stat.size > MAX_SBC_READ_BYTES) {
+      return { oversizedBytes: stat.size };
+    }
+
+    return { content: await fs.readFile(filePath, 'utf8') };
+  }
+
+  private async readSbcFromDiskOrEmpty(filePath: string): Promise<string> {
+    const read = await this.readSbcFromDisk(filePath);
+    return read.content ?? '';
+  }
 }
 
 function createLimitedScopeIssue(scopeLabel: string): ValidationIssue {
@@ -586,4 +637,14 @@ function toDiagnosticSeverity(severity: ValidationIssue['severity']): vscode.Dia
     default:
       return vscode.DiagnosticSeverity.Information;
   }
+}
+
+function formatSbcByteSize(bytes: number): string {
+  if (bytes >= 1024 * 1024 * 1024) {
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  }
+  if (bytes >= 1024 * 1024) {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+  return `${Math.round(bytes / 1024)} KB`;
 }
