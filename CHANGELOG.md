@@ -2,6 +2,14 @@
 
 All notable changes to the MES Reference Library extension are documented here.
 
+## [3.19.5] - 2026-07-12
+
+### Fixed
+
+- **SBC / Mod validation false positives** for tags like `[MaxActions:-1]`, `[CheckTargetDistance:true]`, `[LimitRotationSpeed:true]`, and `[ReplenishSystems:true]`.
+- Wiki tag metadata parsing now reads MES-WebWiki `<table>` markup (previously looked for nonexistent `role="table"` tables, so Allowed Values were ignored).
+- `-1` is accepted only on MES tags where the source uses it as disabled/unlimited (110 tags derived from MES `Profile.cs` defaults plus wiki default/description hints).
+
 ## [3.19.4] - 2026-07-12
 
 ### Fixed

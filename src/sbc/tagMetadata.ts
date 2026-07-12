@@ -1,3 +1,5 @@
+import { MES_MINUS_ONE_NUMERIC_TAGS } from './mesMinusOneNumericTags';
+
 export type TagValueKind =
   | 'boolean'
   | 'enum'
@@ -20,8 +22,7 @@ export interface TagValueSpec {
   multipleAllowed?: boolean;
 }
 
-/** MES treats -1 as "no limit" for these target threat-score bounds (TargetingSystem.cs). */
-export const MES_MINUS_ONE_NUMERIC_TAGS = new Set(['MinTargetValue', 'MaxTargetValue']);
+export { MES_MINUS_ONE_NUMERIC_TAGS };
 
 export function applyValueSpecOverrides(tagName: string, spec: TagValueSpec): TagValueSpec {
   if (
@@ -44,7 +45,8 @@ export interface TagMetadata {
 export const VECTOR3D_PATTERN =
   /^\{\s*X:\s*(-?\d+(?:\.\d+)?)\s+Y:\s*(-?\d+(?:\.\d+)?)\s+Z:\s*(-?\d+(?:\.\d+)?)\s*\}$/i;
 
-const TABLE_PATTERN = /<table role="table">([\s\S]*?)<\/table>/gi;
+/** MES-WebWiki tag tables use plain `<table>` (no role attribute). */
+const TABLE_PATTERN = /<table(?:\s[^>]*)?>([\s\S]*?)<\/table>/gi;
 const CODE_PATTERN = /<code>([^<]*)<\/code>/gi;
 
 export function parseTagMetadataFromWiki(html: string, wikiFile: string): Map<string, TagMetadata> {
@@ -66,6 +68,7 @@ export function parseTagMetadataFromWiki(html: string, wikiFile: string): Map<st
     }
 
     const descriptionHtml = extractTableCell(tableHtml, 'Description:');
+    const defaultValueHtml = extractTableCell(tableHtml, 'Default Value(s):');
 
     const multipleAllowed = extractTableCell(tableHtml, 'Multiple Tag Allowed:')
       ?.replace(/<[^>]+>/g, '')
@@ -73,7 +76,7 @@ export function parseTagMetadataFromWiki(html: string, wikiFile: string): Map<st
       .toLowerCase() === 'yes';
 
     let valueSpec = parseAllowedValues(allowedHtml);
-    if (descriptionHtml && mentionsMinusOne(stripHtml(descriptionHtml).toLowerCase(), [])) {
+    if (mentionsMinusOneInWikiContext(descriptionHtml, defaultValueHtml, allowedHtml)) {
       valueSpec = { ...valueSpec, allowMinusOne: true };
     }
     valueSpec = applyValueSpecOverrides(tagName, valueSpec);
@@ -193,12 +196,16 @@ function parseAllowedValues(allowedHtml: string): TagValueSpec {
     };
   }
 
-  const gteMatch = lower.match(/(?:at least|minimum of) [`'"]?(-?\d+(?:\.\d+)?)[`'"]?/);
+  const gteMatch = lower.match(
+    /(?:at least|minimum of|greater or equal to|equal\/higher than|equal or higher than) [`'"]?(-?\d+(?:\.\d+)?)[`'"]?/
+  );
   if (gteMatch) {
+    const min = Number(gteMatch[1]);
     return {
       kind: lower.includes('integer') ? 'integer' : 'number',
-      min: Number(gteMatch[1]),
-      allowMinusOne: mentionsMinusOne(lower, codes),
+      min,
+      minExclusive: min >= 0,
+      allowMinusOne: mentionsMinusOne(lower, codes) || min === -1,
     };
   }
 
@@ -224,7 +231,44 @@ function parseAllowedValues(allowedHtml: string): TagValueSpec {
 }
 
 function mentionsMinusOne(lower: string, codes: string[]): boolean {
-  return lower.includes('-1') || codes.some((code) => code.trim() === '-1');
+  return (
+    lower.includes('-1') ||
+    /no limit|not considered|not used|unused|no limit/i.test(lower) ||
+    codes.some((code) => code.trim() === '-1')
+  );
+}
+
+function mentionsMinusOneInWikiContext(
+  descriptionHtml: string | null,
+  defaultValueHtml: string | null,
+  allowedHtml: string
+): boolean {
+  const allowedText = stripHtml(allowedHtml).toLowerCase();
+  const allowedCodes = extractCodeValues(allowedHtml);
+  if (mentionsMinusOne(allowedText, allowedCodes)) {
+    return true;
+  }
+
+  if (defaultValueHtml) {
+    const defaultCodes = extractCodeValues(defaultValueHtml);
+    if (defaultCodes.some((code) => code.trim() === '-1')) {
+      return true;
+    }
+  }
+
+  if (descriptionHtml) {
+    const description = stripHtml(descriptionHtml).toLowerCase();
+    if (
+      mentionsMinusOne(description, extractCodeValues(descriptionHtml)) ||
+      /value of [`'"]?-1|a value of -1|set to [`'"]?-1|defaults? to [`'"]?-1|not considered|not used|no limit/i.test(
+        description
+      )
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function isCoordinatesAllowedValues(lower: string): boolean {
@@ -317,20 +361,26 @@ export function formatInvalidValueMessage(
 
 /** Guess value type from tag name when wiki metadata is unavailable. */
 export function inferValueSpecFromTagName(tagName: string): TagValueSpec | null {
-  if (tagName.startsWith('Use') || tagName.toLowerCase().includes('enable')) {
+  if (
+    tagName.startsWith('Use') ||
+    tagName.startsWith('Check') ||
+    tagName === 'LimitRotationSpeed' ||
+    tagName === 'ReplenishSystems' ||
+    tagName.toLowerCase().includes('enable')
+  ) {
     return { kind: 'boolean' };
   }
 
   if (
     /^(Min|Max)/.test(tagName) ||
-    /(Distance|Range|Amount|Cooldown|Delay|Rate|Speed|Percent|Percentage|Angle|Health|Altitude|Radius|Time|Fire|Clip|Replenish|Ms)$/i.test(
+    /(Distance|Range|Amount|Cooldown|Delay|Rate|Speed|Percent|Percentage|Angle|Health|Altitude|Radius|Time|Fire|Clip|Ms)$/i.test(
       tagName
     )
   ) {
     return applyValueSpecOverrides(tagName, {
       kind: 'number',
       min: 0,
-      minExclusive: true,
+      minExclusive: !MES_MINUS_ONE_NUMERIC_TAGS.has(tagName),
     });
   }
 
