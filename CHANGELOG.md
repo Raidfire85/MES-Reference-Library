@@ -2,6 +2,12 @@
 
 All notable changes to the MES Reference Library extension are documented here.
 
+## [3.19.7] - 2026-07-12
+
+### Changed
+
+- Mod validator `.sbc` read limit raised from 50 MB to **100 MB** so large prefab definitions can be validated without being skipped.
+
 ## [3.19.6] - 2026-07-12
 
 ### Fixed

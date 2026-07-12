@@ -155,7 +155,7 @@ export class ModValidationReportPanel implements vscode.Disposable {
         ? ''
         : `<section class="section skipped-section">
         <h2>Skipped oversized .sbc files (${report.skippedOversizedFiles.length})</h2>
-        <p class="lead">These files exceed the 50 MB read limit (usually world saves copied into a mod folder, not mod definitions).</p>
+        <p class="lead">These files exceed the 100 MB read limit (usually world saves copied into a mod folder, not mod definitions).</p>
         <ul class="category-list">${report.skippedOversizedFiles
           .map(
             (file) =>

@@ -15,7 +15,7 @@ import { refreshDiscoveredHeaders } from './wikiSync/refreshDiscoveredHeaders';
 import { MesWikiViewProvider } from './mesWikiViewProvider';
 
 /** Mod definition .sbc files are small; world saves can be multi-GB and must not be read whole. */
-const MAX_SBC_READ_BYTES = 50 * 1024 * 1024;
+const MAX_SBC_READ_BYTES = 100 * 1024 * 1024;
 
 export class SbcValidatorService implements vscode.Disposable {
   private readonly diagnostics = vscode.languages.createDiagnosticCollection('mesReference');
